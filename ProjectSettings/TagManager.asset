@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - OneWay
+  - Door
   layers:
   - Default
   - TransparentFX
