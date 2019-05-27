@@ -8,6 +8,8 @@ public enum SlimeState {
   Normal,
   Carried,
   Thrown,
+  Knocking,
+  MovingIn
 }
 public class Slime : PhysicsObject {
   public Sensor wallSensor;
@@ -23,7 +25,7 @@ public class Slime : PhysicsObject {
   protected bool toBeDeleted = false;
 
 
-  private StateMachine<SlimeState> fsm = new StateMachine<SlimeState>(SlimeState.Normal);
+  private StateMachine<SlimeState> fsm = new StateMachine<SlimeState>(SlimeState.Knocking);
   private SpriteAnim animator;
   private int dir = 1;
   private float originalGravity;
@@ -43,6 +45,7 @@ public class Slime : PhysicsObject {
     fsm.Bind(SlimeState.Normal, NormalEnter, NormalUpdate, NormalExit);
     fsm.Bind(SlimeState.Carried, CarriedEnter, CarriedUpdate, CarriedExit);
     fsm.Bind(SlimeState.Thrown, ThrownEnter, ThrownUpdate, ThrownExit);
+    fsm.Bind(SlimeState.Knocking, KnockingEnter, KnockingUpdate, KnockingExit);
   }
 
   // Update is called once per frame
@@ -108,7 +111,6 @@ public class Slime : PhysicsObject {
     this.currentWobbleSpeed = wobbleSpeed;
   }
   void CombinedUpdate() {
-    //currentWobbleSpeed -= 1;
     currentWobbleIntensity -= 0.01f;
     currentWobbleSpeed -= 0.01f;
     var xOffset = MathUtil.Map(Mathf.Sin(Time.time * currentWobbleSpeed), -1, 1, 0.9f, 1.1f);
@@ -123,6 +125,23 @@ public class Slime : PhysicsObject {
   void CombinedExit() {
     spriteRenderer.transform.localScale = Vector3.one;
   }
+  
+  void KnockingEnter () {
+    
+
+  }
+  void KnockingUpdate() {
+    if (!wallSensor.colliding) {
+      this.velocity = Vector2.right * dir;
+    }
+    else {
+      this.velocity = Vector2.zero;
+    }
+  }
+  void KnockingExit() {
+
+  }
+  
   void OnTriggerEnter2D(Collider2D col) {
     if (!col.transform.parent || toBeDeleted) return;
 
@@ -141,6 +160,12 @@ public class Slime : PhysicsObject {
         Destroy(gameObject);
         Destroy(otherSlime.gameObject);
       }
+
+    }
+
+    var door = col.transform.parent.GetComponent<Door>();
+    if (door) {
+      door.slimeAtDoor = this;
     }
   }
 }

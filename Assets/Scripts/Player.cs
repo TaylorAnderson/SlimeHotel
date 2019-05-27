@@ -288,14 +288,22 @@ public class Player : PhysicsObject {
   }
 
   void OnTriggerEnter2D(Collider2D col) {
-    if (col.transform.parent.GetComponent<Slime>() && !slimeBeingCarried) {
+    if (col.transform.parent && col.transform.parent.GetComponent<Slime>() && !slimeBeingCarried) {
       slimeToGrab = col.transform.parent.GetComponent<Slime>();
+    }
+    else if (col.gameObject.GetComponent<Door>()) {
+      var door = col.gameObject.GetComponent<Door>();
+      door.Open();
     }
   }
 
   void OnTriggerExit2D(Collider2D col) {
-    if (col.transform.parent.GetComponent<Slime>() && !slimeBeingCarried) {
+    if (col.transform.parent && col.transform.parent.GetComponent<Slime>() && !slimeBeingCarried) {
       slimeToGrab = null;
+    }
+    else if (col.gameObject.GetComponent<Door>()) {
+      var door = col.gameObject.GetComponent<Door>();
+      door.Close();
     }
   }
 }
