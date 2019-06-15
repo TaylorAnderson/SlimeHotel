@@ -6,6 +6,11 @@ TagManager:
   tags:
   - OneWay
   - Door
+  - Blocker
+  - Passthru
+  - DoorTrigger
+  - SlimeAtDoorTrigger
+  - ExitTrigger
   layers:
   - Default
   - TransparentFX
@@ -20,9 +25,9 @@ TagManager:
   - BG
   - Player
   - Trigger
-  - 
-  - 
-  - 
+  - Adventurer
+  - Shadow
+  - OneWay
   - 
   - 
   - 
@@ -40,6 +45,12 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: BG
+    uniqueID: 1683461119
+    locked: 0
+  - name: Door
+    uniqueID: 1353041169
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0

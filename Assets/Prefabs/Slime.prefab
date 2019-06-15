@@ -75,22 +75,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49641136d1d77384b8ed09f2f1bfb1e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  rb2d: {fileID: 0}
   minGroundNormalY: 0.65
-  gravityModifier: 25
+  gravityModifier: 40
   velocity: {x: 0, y: 0}
   useCollision: 1
   layerMask:
     serializedVersion: 2
-    m_Bits: 256
-  oneWayLayerTag: OneWay
+    m_Bits: 33024
   ignoredColliders: []
   spriteRenderer: {fileID: 0}
+  throwSpeed: 50
   wallSensor: {fileID: 3029749510833018909}
   platformSensor: {fileID: 3029749511569173423}
   speed: 100
-  throwSpeed: 50
   size: 1
   postCombinePauseInSeconds: 0.5
+  color: {r: 0.24705884, g: 0.67058825, b: 0.24313727, a: 1}
+  outline: {fileID: 6514009249871900190}
+  pickupTrigger: {fileID: 7310506788172909306}
 --- !u!50 &3029749510149157049
 Rigidbody2D:
   serializedVersion: 4
@@ -122,10 +125,12 @@ GameObject:
   m_Component:
   - component: {fileID: 3029749510833018898}
   - component: {fileID: 3029749510833018909}
+  - component: {fileID: 4158842085712045667}
+  - component: {fileID: 6835861189156811090}
   m_Layer: 0
   m_Name: WallSensor
   m_TagString: Untagged
-  m_Icon: {fileID: 4162164826716764455, guid: 0000000000000000d000000000000000, type: 0}
+  m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -158,7 +163,54 @@ MonoBehaviour:
   colliding: 0
   layerMask:
     serializedVersion: 2
-    m_Bits: 311
+    m_Bits: 256
+--- !u!61 &4158842085712045667
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3029749510833018899}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 0.1, y: 0.1}
+  m_EdgeRadius: 0
+--- !u!50 &6835861189156811090
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3029749510833018899}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!1 &3029749511569173421
 GameObject:
   m_ObjectHideFlags: 0
@@ -169,10 +221,12 @@ GameObject:
   m_Component:
   - component: {fileID: 3029749511569173420}
   - component: {fileID: 3029749511569173423}
+  - component: {fileID: 5894824664018703718}
+  - component: {fileID: 4595470968955934930}
   m_Layer: 0
   m_Name: PlatformSensor
   m_TagString: Untagged
-  m_Icon: {fileID: 4162164826716764455, guid: 0000000000000000d000000000000000, type: 0}
+  m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -205,7 +259,54 @@ MonoBehaviour:
   colliding: 0
   layerMask:
     serializedVersion: 2
-    m_Bits: 311
+    m_Bits: 32768
+--- !u!61 &5894824664018703718
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3029749511569173421}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 0.1, y: 0.1}
+  m_EdgeRadius: 0
+--- !u!50 &4595470968955934930
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3029749511569173421}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!1 &6514009249871900190
 GameObject:
   m_ObjectHideFlags: 0
@@ -273,7 +374,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 2
   m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -394,7 +495,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 178fbfc47b8960b48b23bc1c1a7d1fd5, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -413,7 +514,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 2
   m_Sprite: {fileID: 368543389579951487, guid: 04afdbdbd8ec77247a7f75891d0b1fa5, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0

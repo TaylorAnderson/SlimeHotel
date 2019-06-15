@@ -6,12 +6,13 @@ public class CharacterActions : PlayerActionSet {
 
   public PlayerAction Left;
   public PlayerAction Right;
-  public PlayerAction Down;
-  public PlayerAction Up;
   public PlayerAction Jump;
   public PlayerOneAxisAction Move;
   public PlayerAction Run;
   public PlayerAction Grab;
+  public PlayerAction Pause;
+  public PlayerAction Restart;
+  public PlayerAction Mute;
 
   public CharacterActions() {
     Left = CreatePlayerAction("Move Left");
@@ -19,5 +20,8 @@ public class CharacterActions : PlayerActionSet {
     Jump = CreatePlayerAction("Jump");
     Move = CreateOneAxisPlayerAction(Left, Right);
     Grab = CreatePlayerAction("Grab");
+    Pause = CreatePlayerAction("Pause");
+    Restart = CreatePlayerAction("Restart");
+    Mute = CreatePlayerAction("Mute");
   }
 }

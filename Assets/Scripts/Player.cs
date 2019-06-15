@@ -8,6 +8,8 @@ using PowerTools;
 public enum PlayerState {
   Ground,
   Air,
+  Throwing,
+  Pickup
 }
 public enum PlayerAnim {
   Idle,
@@ -19,6 +21,8 @@ public enum PlayerAnim {
   Carry_Fall,
   Fall,
   Throw,
+  Grab,
+
 
 }
 
@@ -67,8 +71,6 @@ public class Player : PhysicsObject {
   private float hInput = 0f;
   private float prevHInput = 0f;
 
-  private float jumps = 0;
-  private float jumpLimit = 1;
 
   private float currentSpeed;
 
@@ -77,11 +79,14 @@ public class Player : PhysicsObject {
 
   private bool doubleJumped = false;
 
-  private Slime slimeToGrab;
-  private Slime slimeBeingCarried;
+  private Pickup objectToGrab;
+  private Pickup objectBeingCarried;
 
-  public Transform slimePos;
+  public Transform carryPos;
 
+  private float throwTimer = 0;
+  private float pickupTimer = 0;
+  private Vector2 preThrowVel;
 
 
   public List<string> acceptedCollisionTags = new List<string> { "Enemy", "Crate", "Button" };
@@ -105,6 +110,8 @@ public class Player : PhysicsObject {
     fsm = new StateMachine<PlayerState>(PlayerState.Air);
     fsm.Bind(PlayerState.Air, null, Air_Update, null);
     fsm.Bind(PlayerState.Ground, Ground_Enter, Ground_Update, Ground_Exit);
+    fsm.Bind(PlayerState.Throwing, Throwing_Enter, Throwing_Update, Throwing_Exit);
+    fsm.Bind(PlayerState.Pickup, Pickup_Enter, Pickup_Update, Pickup_Exit);
 
     input = new CharacterActions();
     input.Left.AddDefaultBinding(Key.A);
@@ -137,31 +144,26 @@ public class Player : PhysicsObject {
 
 
 
-    if (slimeBeingCarried) {
-      HandleSlimeThrow();
-    }
-    else {
-      if (input.Grab.WasPressed && slimeToGrab) {
-        slimeBeingCarried = slimeToGrab;
-        slimeBeingCarried.PickUp();
-        slimeBeingCarried.transform.parent = transform;
-        slimeBeingCarried.transform.position = (Vector3)this.slimePos.position + Vector3.up * slimeBeingCarried.spriteRenderer.bounds.extents.y;
-      }
-    }
-
-
-
     if (hInput != 0) {
-      currentAnim = this.slimeBeingCarried ? PlayerAnim.Carry_Walk : PlayerAnim.Walk;
+      currentAnim = this.objectBeingCarried ? PlayerAnim.Carry_Walk : PlayerAnim.Walk;
     }
     else {
-      currentAnim = this.slimeBeingCarried ? PlayerAnim.Carry_Idle : PlayerAnim.Idle;
+      currentAnim = this.objectBeingCarried ? PlayerAnim.Carry_Idle : PlayerAnim.Idle;
     }
 
     if (!animator.IsPlaying(animations[currentAnim])) {
       PlayAnim(currentAnim);
     }
     //END ANIMATION STUFF
+
+    if (objectBeingCarried) {
+      HandleObjectThrow();
+    }
+    else {
+      if (input.Grab.WasPressed && objectToGrab) {
+        fsm.ChangeState(PlayerState.Pickup);
+      }
+    }
 
     this.currentSpeed = this.speed;
     if (input.Jump.WasPressed) {
@@ -180,16 +182,14 @@ public class Player : PhysicsObject {
     }
 
     HandleLeftRightMovement();
-
-
   }
 
   public void Ground_Exit() {
   }
 
   public void Air_Update() {
-    if (this.velocity.y > 0) PlayAnim(this.slimeBeingCarried ? PlayerAnim.Carry_Jump : PlayerAnim.Jump);
-    else PlayAnim(this.slimeBeingCarried ? PlayerAnim.Carry_Idle : PlayerAnim.Fall);
+    if (this.velocity.y > 0) PlayAnim(this.objectBeingCarried ? PlayerAnim.Carry_Jump : PlayerAnim.Jump);
+    else PlayAnim(this.objectBeingCarried ? PlayerAnim.Carry_Fall : PlayerAnim.Fall);
 
     if (input.Jump.WasReleased) {
       velocity.y *= 0.5f;
@@ -207,7 +207,72 @@ public class Player : PhysicsObject {
     }
 
     HandleLeftRightMovement();
-    HandleSlimeThrow();
+    HandleObjectThrow();
+  }
+
+
+  public void Throwing_Enter() {
+    PlayAnim(PlayerAnim.Throw);
+    throwTimer = 0;
+    preThrowVel = velocity;
+
+
+  }
+  public void Throwing_Update() {
+    throwTimer += Time.deltaTime;
+    if (throwTimer >= animations[PlayerAnim.Throw].length) {
+      fsm.ChangeState(PlayerState.Air);
+    }
+    if (throwTimer >= animations[PlayerAnim.Throw].length / 2 && objectBeingCarried) {
+
+
+      if (objectBeingCarried.spriteRenderer.bounds.size.x > spriteRenderer.bounds.size.x) {
+        var center = spriteRenderer.bounds.center;
+        var lineLeft = Physics2D.Linecast(center, center + Vector3.left * 1000, layerMask);
+        var lineRight = Physics2D.Linecast(center, center + Vector3.right * 1000, layerMask);
+        var distLeft = Mathf.Abs(lineLeft.point.x - center.x);
+        var distRight = Mathf.Abs(lineRight.point.x - center.x);
+        var leftGood = (distLeft > objectBeingCarried.spriteRenderer.bounds.size.x);
+        var rightGood = (distRight > objectBeingCarried.spriteRenderer.bounds.size.x);
+        if (leftGood && !rightGood) {
+          objectBeingCarried.transform.position += Vector3.left * (objectBeingCarried.spriteRenderer.bounds.extents.x - spriteRenderer.bounds.extents.x + 0.1f);
+        }
+        if (rightGood && !leftGood) {
+          objectBeingCarried.transform.position += Vector3.right * (objectBeingCarried.spriteRenderer.bounds.extents.x - spriteRenderer.bounds.extents.x + 0.05f);
+        }
+      }
+
+      objectBeingCarried.transform.position += Vector3.down * (spriteRenderer.bounds.size.y);
+      objectBeingCarried.transform.parent = null;
+      objectBeingCarried.Throw(spriteRenderer.flipX ? -1 : 1);
+      objectBeingCarried = null;
+      objectToGrab = null;
+    }
+    velocity = Vector2.zero;
+  }
+  public void Throwing_Exit() {
+    velocity = preThrowVel;
+
+  }
+
+  public void Pickup_Enter() {
+    PlayAnim(PlayerAnim.Grab);
+    pickupTimer = 0;
+    objectBeingCarried = objectToGrab;
+    objectBeingCarried.velocity = Vector2.zero;
+  }
+  public void Pickup_Update() {
+    velocity = Vector2.zero;
+    pickupTimer += Time.deltaTime;
+    if (pickupTimer > animations[PlayerAnim.Grab].length) {
+      fsm.ChangeState(PlayerState.Ground);
+    }
+  }
+  public void Pickup_Exit() {
+
+    objectBeingCarried.PickUp();
+    objectBeingCarried.transform.parent = transform;
+    objectBeingCarried.transform.position = (Vector3)this.carryPos.position + Vector3.up * objectBeingCarried.spriteRenderer.bounds.extents.y;
   }
 
   protected override void ComputeVelocity() {
@@ -219,7 +284,7 @@ public class Player : PhysicsObject {
 
   }
 
-  private void Update() {
+  public override void PausableUpdate() {
     fsm.Update();
   }
 
@@ -252,32 +317,10 @@ public class Player : PhysicsObject {
       velocity.x *= 0.8f;
     }
   }
-
-  public void HandleSlimeThrow() {
-    if (!slimeBeingCarried) return;
+  public void HandleObjectThrow() {
+    if (!objectBeingCarried) return;
     if (input.Grab.WasPressed) {
-      slimeBeingCarried.transform.parent = null;
-
-      if (slimeBeingCarried.spriteRenderer.bounds.size.x > spriteRenderer.bounds.size.x) {
-        var center = spriteRenderer.bounds.center;
-        var lineLeft = Physics2D.Linecast(center, center + Vector3.left * 1000, layerMask);
-        var lineRight = Physics2D.Linecast(center, center + Vector3.right * 1000, layerMask);
-        var distLeft = Mathf.Abs(lineLeft.point.x - center.x);
-        var distRight = Mathf.Abs(lineRight.point.x - center.x);
-        var leftGood = (distLeft > slimeBeingCarried.spriteRenderer.bounds.size.x);
-        var rightGood = (distRight > slimeBeingCarried.spriteRenderer.bounds.size.x);
-        if (leftGood && !rightGood) {
-          slimeBeingCarried.transform.position += Vector3.left * (slimeBeingCarried.spriteRenderer.bounds.extents.x - spriteRenderer.bounds.extents.x + 0.1f);
-        }
-        if (rightGood && !leftGood) {
-          slimeBeingCarried.transform.position += Vector3.right * (slimeBeingCarried.spriteRenderer.bounds.extents.x - spriteRenderer.bounds.extents.x + 0.05f);
-        }
-      }
-
-      slimeBeingCarried.transform.position += Vector3.down * (spriteRenderer.bounds.size.y);
-
-      slimeBeingCarried.Throw(spriteRenderer.flipX ? -1 : 1);
-      slimeBeingCarried = null;
+      fsm.ChangeState(PlayerState.Throwing);
     }
   }
 
@@ -288,21 +331,26 @@ public class Player : PhysicsObject {
   }
 
   void OnTriggerEnter2D(Collider2D col) {
-    if (col.transform.parent && col.transform.parent.GetComponent<Slime>() && !slimeBeingCarried) {
-      slimeToGrab = col.transform.parent.GetComponent<Slime>();
+    if (col.transform.parent) {
+      if (col.transform.parent.GetComponent<Pickup>() && !objectBeingCarried) {
+        objectToGrab = col.transform.parent.GetComponent<Pickup>();
+      }
+
+      else if (col.transform.parent.gameObject.GetComponent<Door>() && col.CompareTag("DoorTrigger")) {
+        var door = col.transform.parent.gameObject.GetComponent<Door>();
+        door.Open();
+      }
     }
-    else if (col.gameObject.GetComponent<Door>()) {
-      var door = col.gameObject.GetComponent<Door>();
-      door.Open();
-    }
+
+
   }
 
   void OnTriggerExit2D(Collider2D col) {
-    if (col.transform.parent && col.transform.parent.GetComponent<Slime>() && !slimeBeingCarried) {
-      slimeToGrab = null;
+    if (col.transform.parent && col.transform.parent.GetComponent<Slime>() && !objectBeingCarried) {
+      objectToGrab = null;
     }
-    else if (col.gameObject.GetComponent<Door>()) {
-      var door = col.gameObject.GetComponent<Door>();
+    else if (col.transform.parent && col.transform.parent.GetComponent<Door>() && col.CompareTag("DoorTrigger")) {
+      var door = col.transform.parent.GetComponent<Door>();
       door.Close();
     }
   }

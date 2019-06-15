@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PhysicsObject : MonoBehaviour {
+public class PhysicsObject : Pausable {
 
   public float minGroundNormalY = .65f;
 
@@ -11,11 +11,9 @@ public class PhysicsObject : MonoBehaviour {
   protected float currentGravityModifier;
   protected bool grounded;
   protected float bounciness = 1;
-  protected Vector2 groundNormal = Vector2.zero;
+  protected Vector2 groundNormal = Vector2.up;
   protected Vector2 targetVelocity;
-  protected Rigidbody2D rb2d;
-  new protected BoxCollider2D collider;
-  float radius = 0.5f;
+  new protected Collider2D collider;
   public Vector2 velocity;
 
   [HideInInspector]
@@ -28,7 +26,7 @@ public class PhysicsObject : MonoBehaviour {
   protected const float shellRadius = 0.01f;
 
   public LayerMask layerMask;
-  public string oneWayLayerTag;
+  protected const string ONE_WAY_LAYER_TAG = "OneWay";
 
   public List<Collider2D> ignoredColliders;
 
@@ -43,7 +41,11 @@ public class PhysicsObject : MonoBehaviour {
     this.currentGravityModifier = gravityModifier;
   }
 
-  protected void Start() {
+  override public void Start() {
+    base.Start();
+    Init();
+  }
+  public void Init() {
     contactFilter.useTriggers = false;
     contactFilter.SetLayerMask(layerMask);
     contactFilter.useLayerMask = true;
@@ -53,15 +55,18 @@ public class PhysicsObject : MonoBehaviour {
   }
 
   protected virtual bool IsCollisionFit(RaycastHit2D hit) {
+
     Vector3 bottomPos = GetBottom();
     Vector3 colPos = hit.point;
-    return (velocity.y < 0 && colPos.y <= bottomPos.y) || !hit.collider.gameObject.CompareTag(this.oneWayLayerTag);
+
+    var fit = (velocity.y < 0 && colPos.y <= bottomPos.y) || !hit.collider.gameObject.CompareTag(ONE_WAY_LAYER_TAG);
+    return fit;
   }
 
-  void FixedUpdate() {
+  override public void PausableFixedUpdate() {
 
     velocity += currentGravityModifier * Physics2D.gravity * Time.deltaTime;
-    ComputeVelocity();
+    ComputeVelocity(); //subclasses hook in here
     grounded = false;
 
     Vector2 deltaPosition = velocity * Time.deltaTime;
@@ -117,6 +122,8 @@ public class PhysicsObject : MonoBehaviour {
         distance = modifiedDistance < distance ? modifiedDistance : distance;
       }
     }
+
+
     if (rb2d.bodyType == RigidbodyType2D.Kinematic) rb2d.position = rb2d.position + move.normalized * distance;
 
     foreach (Collider2D collider in ignoredColliders) {
