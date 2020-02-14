@@ -2,10 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
+public class SlimeColor {
+  public Color slimeColor;
+  public float probability;
+  public float valueMultiplier = 1;
+}
 public class SlimeManager : MonoBehaviour {
   public static SlimeManager instance;
   public GameObject[] slimeProgression;
-  public Color[] slimeColors;
+  public SlimeColor[] slimeColors;
   // Start is called before the first frame update
   void Start() {
     SlimeManager.instance = this;

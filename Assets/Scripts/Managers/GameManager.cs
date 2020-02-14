@@ -10,10 +10,18 @@ using UnityEngine.SceneManagement;
 
 
 public class Data {
-  public int score;
-  public Data(int score) {
-    this.score = score;
+  public int income;
+  public Data(int income) {
+    this.income = income;
   }
+}
+
+public enum GameState {
+  Title,
+  Day,
+  Shop,
+  Closed,
+
 }
 public class GameManager : MonoBehaviour {
   public static GameManager instance;
@@ -22,19 +30,31 @@ public class GameManager : MonoBehaviour {
   public bool pausedForPauseScreen = false;
   public bool gameEnded = false;
   public int combo = 1;
-  public int score = 0;
-  public int bestScore = 0;
+  public int income = 1000000;
+  public int bestIncome = 0;
+  public int stars = 1;
+  public StateMachine<GameState> fsm = new StateMachine<GameState>(GameState.Title);
+
+  public List<Upgrade> upgrades = new List<Upgrade>();
 
 
 
   private float comboKillTime = 10;
   private float comboKillTimer = 10;
-  [SerializeField] protected GameObject scorePop;
-  [SerializeField] protected GameObject scorePopNegative;
-  [SerializeField] protected Canvas canvas;
-  [SerializeField] protected GameObject gameOverBundle;
+  [SerializeField] protected GameObject shop;
+  [SerializeField] protected GameObject gameOver;
+  [SerializeField] protected GameObject title;
+  [SerializeField] protected GameObject titleExitAnim;
+  [SerializeField] protected SuperTextMesh gameOverIncome;
+  [SerializeField] protected SuperTextMesh gameOverBestIncome;
+
 
   public EndPauseSignal endPauseSignal;
+
+  private float secondsInDay = 120;
+  private float currentSecondsInDay = 120;
+
+
 
 
 
@@ -52,17 +72,18 @@ public class GameManager : MonoBehaviour {
 
 
 
-    SceneManager.activeSceneChanged += (Scene current, Scene next) => {
-      if (next.buildIndex == 1) {
-        ResetInstance();
-      }
-    };
+    fsm.Bind(GameState.Title, TitleEnter, null, null);
+    fsm.Bind(GameState.Day, DayEnter, DayUpdate, null);
+    fsm.Bind(GameState.Shop, ShopEnter, null, ShopExit);
+    fsm.Bind(GameState.Closed, ClosedEnter, ClosedUpdate, ClosedExit);
+    fsm.ChangeState(GameState.Title);
   }
 
 
 
   // Update is called once per frame
   void Update() {
+    fsm.Update();
 
     if (this.combo > 1) {
       comboKillTimer -= Time.deltaTime;
@@ -78,13 +99,70 @@ public class GameManager : MonoBehaviour {
     else {
       Time.timeScale = 1;
     }
-    if (InputManager.input.Pause.WasPressed) {
+    if (Sinput.GetButtonDown("Pause")) {
       GameManager.instance.pausedForPauseScreen = !GameManager.instance.pausedForPauseScreen;
       GameManager.instance.paused = !GameManager.instance.paused;
     }
-    if (InputManager.input.Restart.WasPressed) {
-      SceneManager.LoadSceneAsync(1);
+    if (Sinput.GetButtonDown("Restart")) {
+      SceneManager.LoadSceneAsync(0);
     }
+  }
+
+  public void TitleEnter() {
+    paused = true;
+    title.GetComponentInChildren<UIButton>().buttonSignal.AddListener(StartPressed);
+  }
+  public void DayEnter() {
+    this.paused = false;
+    shop.SetActive(false);
+    currentSecondsInDay = secondsInDay;
+  }
+  public void DayUpdate() {
+    currentSecondsInDay -= Time.deltaTime;
+    if (currentSecondsInDay < 0) {
+      //fsm.ChangeState(GameState.Shop);
+    }
+  }
+
+  public void ShopEnter() {
+    Signals.Get<ShopWindowClosedSignal>().AddListener(ExitShopState);
+
+    shop.SetActive(true);
+    this.paused = true;
+  }
+  public void ShopUpdate() {
+
+  }
+  public void ShopExit() {
+    shop.SetActive(false);
+  }
+
+  public void ClosedEnter() {
+    SaveAndRetrieveBestIncome();
+    paused = true;
+    gameOver.SetActive(true);
+    gameOver.GetComponentInChildren<UIButton>().buttonSignal.AddListener(RestartPressed);
+    gameOverIncome.text = "Income: $" + DisplayUtil.InsertCommas(this.income);
+    gameOverBestIncome.text = "Best Income: $" + DisplayUtil.InsertCommas(this.bestIncome);
+  }
+  public void ClosedUpdate() {
+
+  }
+  public void ClosedExit() {
+
+  }
+
+  public void StartPressed(UIButton button) {
+    fsm.ChangeState(GameState.Day);
+    titleExitAnim.SetActive(true);
+  }
+  public void RestartPressed(UIButton button) {
+    this.fsm.ChangeState(GameState.Day);
+    SceneManager.LoadSceneAsync(0);
+  }
+
+  public void ExitShopState() {
+    fsm.ChangeState(GameState.Day);
   }
 
   public IEnumerator PauseForSeconds(float seconds, Action endPauseAction = null) {
@@ -95,10 +173,11 @@ public class GameManager : MonoBehaviour {
     Signals.Get<EndPauseSignal>().Dispatch();
     Signals.Get<EndPauseSignal>().RemoveListener(endPauseAction);
     this.paused = false;
+    //just doing a test
   }
 
-  public void AddScore(int score, Exit exit) {
-    this.score += score;
+  public void AddMoney(int score, Exit exit) {
+    this.income += score;
   }
 
   public void IncrementCombo() {
@@ -116,6 +195,12 @@ public class GameManager : MonoBehaviour {
     combo = 1;
   }
 
+  public void LoseStar() {
+    stars--;
+    if (stars == 0) {
+      fsm.ChangeState(GameState.Closed);
+    }
+  }
   public void Save(int score) {
     string path = Application.persistentDataPath + "/";
     File.WriteAllText(path + "times.json", JsonUtility.ToJson(new Data(score), true));
@@ -139,32 +224,24 @@ public class GameManager : MonoBehaviour {
     //GameManager.instance = Instantiate(GameManager.instance.gameObject).GetComponent<GameManager>();
   }
 
-  public void EndGame() {
+  public void SaveAndRetrieveBestIncome() {
 
-    SfxManager.instance.StopLoopingSound(SoundType.GAME_MUSIC, -1);
+    //SfxManager.instance.StopLoopingSound(SoundType.GAME_MUSIC, -1);
 
     var data = Load();
 
-    if (data == null || this.score > data.score) {
-      bestScore = score;
-      Save(score);
+    if (data == null || this.income > data.income) {
+      bestIncome = income;
+      Save(income);
     }
     else {
-      bestScore = data.score;
+      bestIncome = data.income;
     }
-    GameManager.instance.gameEnded = true;
-    Signals.Get<EndGameSignal>().Dispatch();
-
-
-
-    StartCoroutine(StartGameOverAfterDelay(1));
   }
 
   public IEnumerator StartGameOverAfterDelay(float delay) {
     yield return new WaitForSecondsRealtime(delay);
-    Debug.Log("hello???");
     SfxManager.instance.StopAllSounds();
-    gameOverBundle.SetActive(true);
 
   }
 }

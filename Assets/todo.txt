@@ -1,0 +1,14 @@
+Throwing a baddie into a baddie should kill both
+Don’t instantly lose when you get hit (instant loss if baby slime is hit is OK)
+When you throw a slime into a slime for a combination, a pop kills any knight or wizard spell about to hit it, saving the slime
+Maybe add objects to throw around?
+Body block wizard spells and maybe sword hits?
+Auto-merging slimes who walk into each other?
+Buff movement speed or add a dash so you can get from the bottom to the top without losing a slime if you play perfectly
+Happy slime face and heart on combination
+Bean wiping his brow when he sends a slime out the door
+Redesigning player to look more like Bean
+Tutorialization for how income works, etc
+R to restart [x]
+Grab stuff while in midair [x]
+Sfx [x]

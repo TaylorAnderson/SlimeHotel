@@ -22,8 +22,6 @@ public enum PlayerAnim {
   Fall,
   Throw,
   Grab,
-
-
 }
 
 [System.Serializable]
@@ -54,13 +52,11 @@ public class Player : PhysicsObject {
   //END FORBIDDEN ZONE
 
   private float originalJumpSpeed;
-  private float friction = 0.95f;
+  private float friction = 0.9f;
   [HideInInspector]
   public StateMachine<PlayerState> fsm;
 
   private GameObject sprite;
-
-  private CharacterActions input;
 
   private Dictionary<PlayerAnim, AnimationClip> animations;
 
@@ -86,7 +82,10 @@ public class Player : PhysicsObject {
 
   private float throwTimer = 0;
   private float pickupTimer = 0;
+  private Vector2 prePickupVel;
   private Vector2 preThrowVel;
+
+
 
 
   public List<string> acceptedCollisionTags = new List<string> { "Enemy", "Crate", "Button" };
@@ -112,23 +111,11 @@ public class Player : PhysicsObject {
     fsm.Bind(PlayerState.Ground, Ground_Enter, Ground_Update, Ground_Exit);
     fsm.Bind(PlayerState.Throwing, Throwing_Enter, Throwing_Update, Throwing_Exit);
     fsm.Bind(PlayerState.Pickup, Pickup_Enter, Pickup_Update, Pickup_Exit);
-
-    input = new CharacterActions();
-    input.Left.AddDefaultBinding(Key.A);
-    input.Left.AddDefaultBinding(Key.LeftArrow);
-    input.Left.AddDefaultBinding(InputControlType.LeftStickLeft);
-
-    input.Right.AddDefaultBinding(Key.D);
-    input.Right.AddDefaultBinding(Key.RightArrow);
-    input.Right.AddDefaultBinding(InputControlType.LeftStickRight);
-
-    input.Jump.AddDefaultBinding(Key.UpArrow);
-    input.Jump.AddDefaultBinding(Key.W);
-    input.Jump.AddDefaultBinding(Key.Space);
-
-    input.Jump.AddDefaultBinding(InputControlType.Action1);
-
-    input.Grab.AddDefaultBinding(Key.Shift);
+    fsm.onChangeState += (newState) => {
+      if (fsm.currentState == PlayerState.Air && newState == PlayerState.Ground) {
+        SfxManager.PlaySoundStatic(SoundType.LAND);
+      }
+    };
     currentSpeed = speed;
   }
 
@@ -142,10 +129,10 @@ public class Player : PhysicsObject {
 
     PlayerAnim currentAnim = PlayerAnim.Idle;
 
-
-
     if (hInput != 0) {
       currentAnim = this.objectBeingCarried ? PlayerAnim.Carry_Walk : PlayerAnim.Walk;
+
+
     }
     else {
       currentAnim = this.objectBeingCarried ? PlayerAnim.Carry_Idle : PlayerAnim.Idle;
@@ -160,18 +147,20 @@ public class Player : PhysicsObject {
       HandleObjectThrow();
     }
     else {
-      if (input.Grab.WasPressed && objectToGrab) {
-        fsm.ChangeState(PlayerState.Pickup);
-      }
+      CheckGrabs();
     }
 
     this.currentSpeed = this.speed;
-    if (input.Jump.WasPressed) {
+
+    if (Sinput.GetButtonDown("Jump")) {
+      SfxManager.instance.PlaySound(SoundType.JUMP);
       Squash(0.05f).Then(() => {
         Stretch();
         velocity.y = jumpSpeed;
       });
-
+    }
+    if (Sinput.GetButtonDown("Down")) {
+      if (groundCollider.CompareTag("OneWay")) transform.position += Vector3.down * 0.5f;
     }
 
     this.currentGravityModifier = this.gravityModifier;
@@ -184,6 +173,23 @@ public class Player : PhysicsObject {
     HandleLeftRightMovement();
   }
 
+  public void CheckGrabs() {
+    if (Sinput.GetButtonDown("Grab")) {
+      var results = new Collider2D[10];
+      var filter = new ContactFilter2D();
+      filter.useTriggers = true;
+
+      Physics2D.OverlapCollider(collider, filter, results);
+      for (int i = 0; i < results.Length; i++) {
+        if (results[i] && (results[i].GetComponent<Pickup>() || (results[i].transform.parent && results[i].transform.parent.GetComponent<Pickup>()))) {
+          objectToGrab = results[i].transform.parent ? results[i].transform.parent.GetComponent<Pickup>() : results[i].GetComponent<Pickup>();
+          fsm.ChangeState(PlayerState.Pickup);
+          break;
+        }
+      }
+    }
+  }
+
   public void Ground_Exit() {
   }
 
@@ -191,7 +197,7 @@ public class Player : PhysicsObject {
     if (this.velocity.y > 0) PlayAnim(this.objectBeingCarried ? PlayerAnim.Carry_Jump : PlayerAnim.Jump);
     else PlayAnim(this.objectBeingCarried ? PlayerAnim.Carry_Fall : PlayerAnim.Fall);
 
-    if (input.Jump.WasReleased) {
+    if (Sinput.GetButtonUp("Jump")) {
       velocity.y *= 0.5f;
     }
 
@@ -199,19 +205,32 @@ public class Player : PhysicsObject {
     else this.currentGravityModifier = this.fallGravityModifier;
 
     if (grounded) fsm.ChangeState(PlayerState.Ground);
-    if (input.Jump.WasPressed && !doubleJumped) {
+    if (Sinput.GetButtonDown("Jump") && !doubleJumped) {
       doubleJumped = true;
-
+      SfxManager.instance.PlaySound(SoundType.JUMP);
       Stretch();
       velocity.y = jumpSpeed;
     }
 
+    if (Sinput.GetButtonDown("Down") && objectBeingCarried && objectBeingCarried.GetComponent<Slime>()) {
+      objectBeingCarried.transform.parent = null;
+      objectBeingCarried.transform.position += Vector3.down * (spriteRenderer.bounds.size.y);
+
+      objectBeingCarried.Throw(0);
+      objectBeingCarried = null;
+      objectToGrab = null;
+    }
+
+
     HandleLeftRightMovement();
     HandleObjectThrow();
+    if (!objectBeingCarried) {
+      CheckGrabs();
+    }
   }
 
-
   public void Throwing_Enter() {
+    SfxManager.instance.PlaySound(SoundType.THROW);
     PlayAnim(PlayerAnim.Throw);
     throwTimer = 0;
     preThrowVel = velocity;
@@ -224,8 +243,6 @@ public class Player : PhysicsObject {
       fsm.ChangeState(PlayerState.Air);
     }
     if (throwTimer >= animations[PlayerAnim.Throw].length / 2 && objectBeingCarried) {
-
-
       if (objectBeingCarried.spriteRenderer.bounds.size.x > spriteRenderer.bounds.size.x) {
         var center = spriteRenderer.bounds.center;
         var lineLeft = Physics2D.Linecast(center, center + Vector3.left * 1000, layerMask);
@@ -241,9 +258,9 @@ public class Player : PhysicsObject {
           objectBeingCarried.transform.position += Vector3.right * (objectBeingCarried.spriteRenderer.bounds.extents.x - spriteRenderer.bounds.extents.x + 0.05f);
         }
       }
-
-      objectBeingCarried.transform.position += Vector3.down * (spriteRenderer.bounds.size.y);
       objectBeingCarried.transform.parent = null;
+      objectBeingCarried.transform.position += Vector3.down * (spriteRenderer.bounds.size.y - 0.01f);
+
       objectBeingCarried.Throw(spriteRenderer.flipX ? -1 : 1);
       objectBeingCarried = null;
       objectToGrab = null;
@@ -257,9 +274,11 @@ public class Player : PhysicsObject {
 
   public void Pickup_Enter() {
     PlayAnim(PlayerAnim.Grab);
+    SfxManager.instance.PlaySound(SoundType.GRAB);
     pickupTimer = 0;
     objectBeingCarried = objectToGrab;
     objectBeingCarried.velocity = Vector2.zero;
+    prePickupVel = this.velocity;
   }
   public void Pickup_Update() {
     velocity = Vector2.zero;
@@ -269,10 +288,10 @@ public class Player : PhysicsObject {
     }
   }
   public void Pickup_Exit() {
-
     objectBeingCarried.PickUp();
     objectBeingCarried.transform.parent = transform;
-    objectBeingCarried.transform.position = (Vector3)this.carryPos.position + Vector3.up * objectBeingCarried.spriteRenderer.bounds.extents.y;
+    objectBeingCarried.transform.position = (Vector3)this.carryPos.position;
+    velocity = prePickupVel;
   }
 
   protected override void ComputeVelocity() {
@@ -299,14 +318,14 @@ public class Player : PhysicsObject {
   }
 
   public void HandleLeftRightMovement() {
-    hInput = input.Move.Value;
+    hInput = Sinput.GetAxisRaw("Horizontal");
 
     spriteRenderer.flipX = hInput != 0 ? hInput < 0 : spriteRenderer.flipX;
     //this sorta weird setup  means that the player can still MOVE really fast (if propelled by external forces)
     //its just that he cant go super fast just by player input alone
 
     //force should be clamped so it doesnt let velocity extend past currentSpeed
-    var force = accel * hInput;
+    var force = accel * hInput * Time.deltaTime * 100;
     force = Mathf.Clamp(force + velocity.x, -currentSpeed, currentSpeed) - velocity.x;
 
     //basically making sure the adjusted force of the input doesn't act against the input itself
@@ -319,40 +338,25 @@ public class Player : PhysicsObject {
   }
   public void HandleObjectThrow() {
     if (!objectBeingCarried) return;
-    if (input.Grab.WasPressed) {
+    if (Sinput.GetButtonDown("Grab")) {
       fsm.ChangeState(PlayerState.Throwing);
     }
   }
-
   public void PlayAnim(PlayerAnim anim) {
     if (!animator.IsPlaying(animations[anim])) {
       animator.Play(animations[anim]);
+
+    }
+  }
+  public void Step() {
+    //SfxManager.instance.PlaySound(SoundType.STEP, 0.1f);
+  }
+  public void OnTriggerEnter2D(Collider2D other) {
+    Looper looper = other.GetComponent<Looper>();
+    if (looper) {
+      this.transform.position = looper.other.transform.position;
     }
   }
 
-  void OnTriggerEnter2D(Collider2D col) {
-    if (col.transform.parent) {
-      if (col.transform.parent.GetComponent<Pickup>() && !objectBeingCarried) {
-        objectToGrab = col.transform.parent.GetComponent<Pickup>();
-      }
-
-      else if (col.transform.parent.gameObject.GetComponent<Door>() && col.CompareTag("DoorTrigger")) {
-        var door = col.transform.parent.gameObject.GetComponent<Door>();
-        door.Open();
-      }
-    }
-
-
-  }
-
-  void OnTriggerExit2D(Collider2D col) {
-    if (col.transform.parent && col.transform.parent.GetComponent<Slime>() && !objectBeingCarried) {
-      objectToGrab = null;
-    }
-    else if (col.transform.parent && col.transform.parent.GetComponent<Door>() && col.CompareTag("DoorTrigger")) {
-      var door = col.transform.parent.GetComponent<Door>();
-      door.Close();
-    }
-  }
 }
 

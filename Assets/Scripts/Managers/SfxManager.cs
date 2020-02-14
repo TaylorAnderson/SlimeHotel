@@ -6,39 +6,16 @@ using deVoid.Utils;
 using UnityEngine.SceneManagement;
 public enum SoundType {
   NONE,
-  BEAN_SHOOT,
-  BEAN_CHARGE,
-  PESTO_SHOOT,
-  PESTO_SHOOT_2,
-  SHIP_HURT,
-  SHIP_SWITCH,
-  SHIP_PARRY,
-  ENERGY_COLLECTED_1,
-  ENERGY_COLLECTED_2,
-  ENERGY_COLLECTED_3,
-
-  ENEMY_HURT,
-
-  EXPLOSION,
-  QUIET_EXPLOSION,
-
-  SHIELD_DEFLECT,
-  SHIELD_HURT,
-  SHIELD_DESTROYED,
-
-  PUFFER_SPIKE,
-
-  SEAHORSE_SHOT,
-
-  SHIP_HURT_AFTER_DEAD,
-
-  SHARK_1,
-  SHARK_2,
-
-  SELECT,
-  GAME_MUSIC,
-  INTRO_MUSIC,
-  GAME_OVER_MUSIC
+  JUMP,
+  GRAB,
+  THROW,
+  HIT_WALL,
+  SLIME_COMBINE,
+  DOOR_OPEN,
+  DOOR_CLOSE,
+  STEP,
+  KNOCK,
+  LAND
 }
 
 [System.Serializable]
@@ -78,7 +55,7 @@ public class SfxManager : MonoBehaviour {
     else if (instance != this)
       Destroy(gameObject);
 
-    DontDestroyOnLoad(gameObject);
+    //DontDestroyOnLoad(gameObject);
 
     CreateAudioSources(100);
 
@@ -99,13 +76,13 @@ public class SfxManager : MonoBehaviour {
   }
 
   public void Update() {
-    if (InputManager.input.Mute.WasPressed) {
+    // input manager used here
+    /*if (InputManager.input.Mute.WasPressed) {
       this.muted = !muted;
-    }
+    }*/
     if (GameManager.instance) {
       AudioListener.volume = muted ? 0 : GameManager.instance.pausedForPauseScreen ? 0.5f : 1;
     }
-
   }
 
   public static int PlaySoundStatic(SoundType soundType, float volume = 1, bool looping = false) {
@@ -173,7 +150,10 @@ public class SfxManager : MonoBehaviour {
 
   public void StopAllSounds() {
     for (int i = 0; i < this.players.Count; i++) {
-      players[i].player.Stop();
+      if (players[i].player) {
+        players[i].player.Stop();
+      }
+
     }
   }
 

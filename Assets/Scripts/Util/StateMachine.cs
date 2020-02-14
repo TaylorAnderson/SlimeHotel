@@ -12,7 +12,7 @@ public class StateMachine<T> where T : struct, IConvertible {
   public State currentStateObj;
   public T currentState;
 
-  public Action onChangeState;
+  public Action<T> onChangeState;
   public StateMachine(T init) {
     if (!typeof(T).IsEnum) {
       throw new ArgumentException("T must be an enumeration");
@@ -35,8 +35,8 @@ public class StateMachine<T> where T : struct, IConvertible {
     if (this.currentStateObj.onEnter != null) {
       this.currentStateObj.onEnter();
     }
+    if (this.onChangeState != null) this.onChangeState.Invoke(state);
     this.currentState = state;
-    if (this.onChangeState != null) this.onChangeState.Invoke();
   }
 
   public void Update() {

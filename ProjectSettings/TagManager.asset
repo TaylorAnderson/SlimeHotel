@@ -11,6 +11,8 @@ TagManager:
   - DoorTrigger
   - SlimeAtDoorTrigger
   - ExitTrigger
+  - Looper
+  - Enemy
   layers:
   - Default
   - TransparentFX
@@ -28,7 +30,7 @@ TagManager:
   - Adventurer
   - Shadow
   - OneWay
-  - 
+  - Entities
   - 
   - 
   - 

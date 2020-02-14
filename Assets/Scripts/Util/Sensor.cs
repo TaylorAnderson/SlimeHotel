@@ -24,7 +24,6 @@ public class Sensor : MonoBehaviour {
 
   public void Recalculate() {
     var posToMoveFrom = parent.transform.position;
-    Debug.DrawLine(posToMoveFrom, transform.position);
     this.info = Physics2D.Linecast(posToMoveFrom, transform.position, layerMask);
     this.unmaskedInfo = Physics2D.Linecast(posToMoveFrom, transform.position, ~(this.gameObject.layer));
     this.colliding = (info.collider && info.collider != this.GetComponent<Collider2D>());

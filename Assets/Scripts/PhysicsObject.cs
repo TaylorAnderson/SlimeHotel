@@ -9,6 +9,7 @@ public class PhysicsObject : Pausable {
 
   public float gravityModifier = 5f;
   protected float currentGravityModifier;
+
   protected bool grounded;
   protected float bounciness = 1;
   protected Vector2 groundNormal = Vector2.up;
@@ -32,6 +33,8 @@ public class PhysicsObject : Pausable {
 
   [HideInInspector]
   public SpriteRenderer spriteRenderer;
+
+  protected Collider2D groundCollider;
 
 
 
@@ -107,6 +110,7 @@ public class PhysicsObject : Pausable {
 
         if (currentNormal.y > minGroundNormalY) {
           grounded = true;
+          groundCollider = hitBuffer[i].collider;
           if (yMovement) {
             groundNormal = currentNormal;
             currentNormal.x = 0;

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -30,5 +31,9 @@ public static class DisplayUtil {
     outline.color = outlineColor;
     outline.Regenerate();
 
+  }
+
+  public static string InsertCommas(int num) {
+    return String.Format("{0:#,###0}", num);
   }
 }
