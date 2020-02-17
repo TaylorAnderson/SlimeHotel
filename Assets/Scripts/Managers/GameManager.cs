@@ -32,7 +32,7 @@ public class GameManager : MonoBehaviour {
   public int combo = 1;
   public int income = 1000000;
   public int bestIncome = 0;
-  public int stars = 1;
+  public int stars = 5;
   public StateMachine<GameState> fsm = new StateMachine<GameState>(GameState.Title);
 
   public List<Upgrade> upgrades = new List<Upgrade>();

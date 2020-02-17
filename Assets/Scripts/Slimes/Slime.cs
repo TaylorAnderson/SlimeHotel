@@ -14,7 +14,7 @@ public enum SlimeState {
 }
 public class Slime : Pickup {
   public Sensor platformSensor;
-  public float speed = 0.1f;
+  public float speed = 0.05f;
 
   public int size;
 
@@ -90,13 +90,16 @@ public class Slime : Pickup {
   }
 
   void NormalEnter() {
+    angry = false;
     animator.Resume();
   }
   void NormalUpdate() {
-    this.velocity = (Vector3)Vector2.right * this.dir * speed * Time.deltaTime;
+    Debug.Log(dir);
+    this.velocity = (Vector3)Vector2.right * this.dir * speed;
     if (!platformSensor.colliding || wallSensor.colliding) {
       dir *= -1;
     }
+    Debug.Log(velocity);
     this.transform.localScale = Vector3.right * dir + Vector3.up + Vector3.forward;
   }
   void NormalExit() {
@@ -129,8 +132,6 @@ public class Slime : Pickup {
     angerTimer = timeToAnger + timeToLeave;
   }
   void KnockingUpdate() {
-
-
     #region Grabbing collisions in front of us
     var results = new List<RaycastHit2D>();
     var filter = new ContactFilter2D();
@@ -262,9 +263,13 @@ public class Slime : Pickup {
 
   void OnTriggerEnter2D(Collider2D col) {
     if (col.GetComponent<Exit>()) {
+      Debug.Log(angry);
       if (!angry && !cashedOut) {
-        GameManager.instance.AddMoney(Mathf.RoundToInt(Mathf.Pow(10, size) * valueMultiplier), col.GetComponent<Exit>());
+        int scoreAdd = Mathf.RoundToInt(Mathf.Pow(10, size) * valueMultiplier);
+        Debug.Log(scoreAdd);
+        GameManager.instance.AddMoney(scoreAdd, col.GetComponent<Exit>());
         cashedOut = true;
+        Debug.Log("get money");
       }
       Destroy(gameObject);
     }
