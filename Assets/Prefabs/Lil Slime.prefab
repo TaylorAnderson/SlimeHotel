@@ -7,11 +7,38 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 2817030993020060995, guid: e81dbec93c642404da338b183ffd906e,
+        type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -1227161679966843129, guid: 937590c2dd723834baa684a22e1821ca,
+        type: 3}
+    - target: {fileID: 3029749510149157042, guid: e81dbec93c642404da338b183ffd906e,
+        type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: -1227161679966843129, guid: 937590c2dd723834baa684a22e1821ca,
+        type: 3}
     - target: {fileID: 3029749510149157043, guid: e81dbec93c642404da338b183ffd906e,
         type: 3}
       propertyPath: m_Name
       value: Lil Slime
       objectReference: {fileID: 0}
+    - target: {fileID: 3029749510149157048, guid: e81dbec93c642404da338b183ffd906e,
+        type: 3}
+      propertyPath: size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3029749510149157048, guid: e81dbec93c642404da338b183ffd906e,
+        type: 3}
+      propertyPath: speed
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 3029749510149157052, guid: e81dbec93c642404da338b183ffd906e,
+        type: 3}
+      propertyPath: m_defaultAnim
+      value: 
+      objectReference: {fileID: 7400000, guid: 9f36e72da04abda4bbcbca438466541b, type: 2}
     - target: {fileID: 3029749510149157053, guid: e81dbec93c642404da338b183ffd906e,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -97,20 +124,15 @@ PrefabInstance:
       propertyPath: m_Size.x
       value: 1.2516838
       objectReference: {fileID: 0}
-    - target: {fileID: 3029749510149157048, guid: e81dbec93c642404da338b183ffd906e,
+    - target: {fileID: 3029749510833018898, guid: e81dbec93c642404da338b183ffd906e,
         type: 3}
-      propertyPath: size
-      value: 0
+      propertyPath: m_LocalPosition.x
+      value: 0.75
       objectReference: {fileID: 0}
-    - target: {fileID: 3029749511569173423, guid: e81dbec93c642404da338b183ffd906e,
-        type: 3}
-      propertyPath: layerMask.m_Bits
-      value: 32768
-      objectReference: {fileID: 0}
-    - target: {fileID: 5231522149142764426, guid: e81dbec93c642404da338b183ffd906e,
+    - target: {fileID: 3029749510833018898, guid: e81dbec93c642404da338b183ffd906e,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.375
       objectReference: {fileID: 0}
     - target: {fileID: 3029749511569173420, guid: e81dbec93c642404da338b183ffd906e,
         type: 3}
@@ -122,45 +144,40 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: -0.25
       objectReference: {fileID: 0}
-    - target: {fileID: 3029749510833018898, guid: e81dbec93c642404da338b183ffd906e,
+    - target: {fileID: 3029749511569173423, guid: e81dbec93c642404da338b183ffd906e,
         type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0.75
+      propertyPath: layerMask.m_Bits
+      value: 32768
       objectReference: {fileID: 0}
-    - target: {fileID: 3029749510833018898, guid: e81dbec93c642404da338b183ffd906e,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.375
-      objectReference: {fileID: 0}
-    - target: {fileID: 6679465116175603913, guid: e81dbec93c642404da338b183ffd906e,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 9175964833642519372, guid: e81dbec93c642404da338b183ffd906e,
+    - target: {fileID: 4919712405008409468, guid: e81dbec93c642404da338b183ffd906e,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 0}
-    - target: {fileID: 9175964833642519372, guid: e81dbec93c642404da338b183ffd906e,
+    - target: {fileID: 4919712405008409468, guid: e81dbec93c642404da338b183ffd906e,
         type: 3}
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 0}
-    - target: {fileID: 9175964833642519372, guid: e81dbec93c642404da338b183ffd906e,
-        type: 3}
-      propertyPath: m_WasSpriteAssigned
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 9175964833642519372, guid: e81dbec93c642404da338b183ffd906e,
+    - target: {fileID: 4919712405008409468, guid: e81dbec93c642404da338b183ffd906e,
         type: 3}
       propertyPath: m_Size.x
       value: 1.5
       objectReference: {fileID: 0}
-    - target: {fileID: 9175964833642519372, guid: e81dbec93c642404da338b183ffd906e,
+    - target: {fileID: 4919712405008409468, guid: e81dbec93c642404da338b183ffd906e,
         type: 3}
       propertyPath: m_Size.y
       value: 1.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 4919712405008409468, guid: e81dbec93c642404da338b183ffd906e,
+        type: 3}
+      propertyPath: m_WasSpriteAssigned
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5231522149142764426, guid: e81dbec93c642404da338b183ffd906e,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5717050400302267701, guid: e81dbec93c642404da338b183ffd906e,
         type: 3}
@@ -182,52 +199,40 @@ PrefabInstance:
       propertyPath: m_Offset.x
       value: 0.052918434
       objectReference: {fileID: 0}
-    - target: {fileID: 2817030993020060995, guid: e81dbec93c642404da338b183ffd906e,
+    - target: {fileID: 6679465116175603913, guid: e81dbec93c642404da338b183ffd906e,
         type: 3}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: -1227161679966843129, guid: 937590c2dd723834baa684a22e1821ca,
-        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 7208865007022455288, guid: e81dbec93c642404da338b183ffd906e,
         type: 3}
       propertyPath: m_defaultAnim
       value: 
       objectReference: {fileID: 7400000, guid: 9f36e72da04abda4bbcbca438466541b, type: 2}
-    - target: {fileID: 4919712405008409468, guid: e81dbec93c642404da338b183ffd906e,
+    - target: {fileID: 9175964833642519372, guid: e81dbec93c642404da338b183ffd906e,
         type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 0}
-    - target: {fileID: 4919712405008409468, guid: e81dbec93c642404da338b183ffd906e,
+    - target: {fileID: 9175964833642519372, guid: e81dbec93c642404da338b183ffd906e,
         type: 3}
       propertyPath: m_Sprite
       value: 
       objectReference: {fileID: 0}
-    - target: {fileID: 4919712405008409468, guid: e81dbec93c642404da338b183ffd906e,
-        type: 3}
-      propertyPath: m_Size.x
-      value: 1.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 4919712405008409468, guid: e81dbec93c642404da338b183ffd906e,
-        type: 3}
-      propertyPath: m_Size.y
-      value: 1.25
-      objectReference: {fileID: 0}
-    - target: {fileID: 4919712405008409468, guid: e81dbec93c642404da338b183ffd906e,
+    - target: {fileID: 9175964833642519372, guid: e81dbec93c642404da338b183ffd906e,
         type: 3}
       propertyPath: m_WasSpriteAssigned
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 3029749510149157052, guid: e81dbec93c642404da338b183ffd906e,
+    - target: {fileID: 9175964833642519372, guid: e81dbec93c642404da338b183ffd906e,
         type: 3}
-      propertyPath: m_defaultAnim
-      value: 
-      objectReference: {fileID: 7400000, guid: 9f36e72da04abda4bbcbca438466541b, type: 2}
-    - target: {fileID: 3029749510149157042, guid: e81dbec93c642404da338b183ffd906e,
+      propertyPath: m_Size.x
+      value: 1.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 9175964833642519372, guid: e81dbec93c642404da338b183ffd906e,
         type: 3}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: -1227161679966843129, guid: 937590c2dd723834baa684a22e1821ca,
-        type: 3}
+      propertyPath: m_Size.y
+      value: 1.25
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e81dbec93c642404da338b183ffd906e, type: 3}

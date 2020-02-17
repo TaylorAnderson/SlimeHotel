@@ -6,6 +6,7 @@ public class SlimeSpawner : Pausable {
   public SlimeSpawnPos[] spawnPositions;
   public float slimeSpawnRate;
   private float slimeSpawnTimer;
+  private List<int> usedSpawnPositions = new List<int>();
   // Start is called before the first frame update
   override public void Start() {
     base.Start();
@@ -18,6 +19,7 @@ public class SlimeSpawner : Pausable {
     if (slimeSpawnTimer > slimeSpawnRate) {
       slimeSpawnTimer -= slimeSpawnRate;
       var randomSpawnPos = UnityEngine.Random.Range(0, spawnPositions.Length);
+      usedSpawnPositions.Add(randomSpawnPos);
 
       var randomInt = UnityEngine.Random.value;
       var tupleList = new List<Tuple<SlimeColor, float>>();

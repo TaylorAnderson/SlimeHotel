@@ -89,7 +89,7 @@ MonoBehaviour:
   wallSensor: {fileID: 3029749510833018909}
   dropped: 0
   platformSensor: {fileID: 3029749511569173423}
-  speed: 100
+  speed: 3
   size: 1
   postCombinePauseInSeconds: 0.5
   color: {r: 0.24705884, g: 0.67058825, b: 0.24313727, a: 1}
@@ -97,6 +97,7 @@ MonoBehaviour:
   pickupTrigger: {fileID: 7310506788172909306}
   angry: 0
   leaving: 0
+  valueMultiplier: 0
 --- !u!50 &3029749510149157049
 Rigidbody2D:
   serializedVersion: 4
@@ -366,6 +367,7 @@ SpriteRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -506,6 +508,7 @@ SpriteRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
